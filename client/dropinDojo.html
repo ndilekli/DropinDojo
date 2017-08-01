@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Hello Dojo!</title>
+</head>
+<body>
+    <div class="pure-g">
+        <label class="pure-u-1-3 label" for="amount">Name your price:</label>
+        <input class="pure-u-2-3" id="amount" class="pure-input-1" name="amount" type="text" placeholder="XX.XX" required>
+    </div>
+
+   <div id="dropin-container"></div>
+   <button id="submit-button">Checkout</button>    
+   <button id="complete-purchase">Complete Purchase</button>    
+     
+    <!-- load Dojo -->
+    <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
+            data-dojo-config="async: true"></script>
+
+    <script>
+    require(["dojo/dom", 
+        "dojo/on", 
+        "dojo/request", 
+        "dojo/Deferred",
+        "dojo/request/registry",
+        "dojo/request/xhr",
+
+        "dojo/html",
+        "https://js.braintreegateway.com/web/dropin/1.3.1/js/dropin.min.js",
+        "dojo/domReady!"     ],
+        function(dom, on, request, Deferred, requestXHR, xhr, html, dropin){
+
+            var form = document.querySelector('#payment-form');
+
+            init();
+
+            function init() {
+                request.get("http://localhost:3000/getClientToken").then(
+                        function(response){
+                            console.log("response: " + response);
+                            clientToken = response;
+                            loadBrainTree();
+                        },
+                        function(error){
+                        }
+                    );                
+            }
+
+            function loadBrainTree() {
+                var submitButton = document.querySelector('#submit-button');
+                var completeButton = document.querySelector('#complete-purchase');                
+
+                dropin.create({
+                    authorization: clientToken,
+                    selector: '#dropin-container'
+                    }, function (err, dropinInstance) {
+                    if (err) {
+                        // Handle any errors that might've occurred when creating Drop-in
+                        console.error(err);
+                        return;
+                    }
+                    else {
+                        console.log("Dropin created");
+                    }
+                    submitButton.addEventListener('click', function () {
+                        dropinInstance.requestPaymentMethod(function (err, payload) {
+                        if (err) {
+                            // Handle errors in requesting payment method
+                        }
+                            console.log("Clicked submit: " + document.getElementById("amount").value);
+                            console.log(payload);
+                            console.log(payload.nonce);                   
+                            request.post("http://localhost:3000/processPayment", {
+                                query: {
+                                    nonce:payload.nonce,
+                                    amount:10
+                                    //amount:document.getElementById("amount").value                                    
+                                },
+                                jsonp: "callback"
+                            }).then(
+                                function(response){
+                                    console.log("response: " + response);
+
+                                },
+                                function(error){
+                                }
+                            );                            
+
+                        // Send payload.nonce to your server
+                        });
+                    });
+
+                });
+            }
+
+        }
+    );
+
+    </script>
+</body>
+</html>

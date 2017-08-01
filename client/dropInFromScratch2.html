@@ -1,0 +1,22 @@
+<head>
+  <meta charset="utf-8">
+  <script src="https://js.braintreegateway.com/web/dropin/1.4.0/js/dropin.min.js"></script>
+</head>
+<body>
+  <div id="dropin-container"></div>
+  <button id="submit-button">Request payment method</button>
+  <script>
+    var button = document.querySelector('#submit-button');
+
+    braintree.dropin.create({
+      authorization: 'MIIBCgKCAQEAuJL780G2Wg5BD4n4AFBDBpehj/h1hkuCaVxbNWiLJBPIZJK/N8oqUatZ1RBNhEzjMJtJkfgfz5eeZM1JYLFibVLz6YKV2h51lvuiocN034Z9n32w3oD5aL8Baje59FHLwbFKe5z/g1BYzWiJb7dkFcQ0lOhUsllH4jCBAvWPbE+Wowt+tz2HQ8QIyxeBj42jWx6tO/ILar1GI1bjVHEvbFKpOEFPmSTLyriirmbz7SaY6ozIUTiW+BoKTueOJA+iYoJlMedLNO9pl/59XS38jZxnmSiLNEnkNuZWVTFxkT8XXchJKHptvwseoPIuy22AMVomV49qjob499KtVQmpoQIDAQAB',
+      container: '#dropin-container'
+    }, function (createErr, instance) {
+      button.addEventListener('click', function () {
+        instance.requestPaymentMethod(function (requestPaymentMethodErr, payload) {
+          // Submit payload.nonce to your server
+        });
+      });
+    });
+  </script>
+</body>

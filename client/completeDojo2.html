@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Hello Dojo!</title>
+</head>
+<body>
+    <h1 id="greeting">Hello</h1>
+    <button id='getToken'>LED on</button>
+    <button id='send-payment'>Send Payment</button>   
+    <!-- load Dojo -->
+    <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
+            data-dojo-config="async: true"></script>
+
+    <script>
+    require(["dojo/dom", 
+        "dojo/on", 
+        "dojo/request", 
+        "dojo/Deferred",
+        "dojo/request/registry",
+        "dojo/request/xhr",
+        "dojo/domReady!",     ],
+        function(dom, on, request, Deferred, requestXHR, xhr){
+
+            function xdr(url, options) {
+                var def = new Deferred();
+                var xdr = new XDomainRequest();
+                if (xdr) {
+                    xdr.onload = function(e) {
+                        def.resolve(xdr.responseText);
+                    }
+                    xdr.open(options.method, url);
+                    xdr.send();
+                    return def;
+                }
+                def.reject(new Error('XDomainRequest not supported.'));
+                return def;
+            }
+
+
+            
+            /**
+             * CORS provider for dojo/request/registry
+             *
+             * @return {dojo/Deferred}
+             */
+            function corsProvider(url, options) {
+                if(window.XDomainRequest) {
+                    return xdr(url, options);
+                }
+                return xhr(url, options);
+            }    
+
+            function testCors() {
+                var url = "http://cors-test.appspot.com/test";
+                var handle = requestXHR.register(url, corsProvider);
+                
+                requestXHR.get(url).then(function(response) {
+                    console.log(response);
+                });
+            }
+            
+            testCors();                    
+
+            var xhr = new XMLHttpRequest();
+            // Results will be displayed in resultDiv
+            //var resultDiv = dom.byId("resultDiv");
+
+            // Attach the onclick event handler to the textButton
+            on(dom.byId("getToken"), "click", function(evt){
+                // Request the text file
+                requestXHR.get("http://localhost:3000/").then(
+                    function(response){
+
+                        console.log("response: " + response);
+                        // Display the text file content
+                        //resultDiv.innerHTML = "<pre>"+response+"</pre>";
+                    },
+                    function(error){
+                        // Display the error returned
+                        //resultDiv.innerHTML = "<div class=\"error\">"+error+"<div>";
+                    }
+                );
+            });
+
+            on(dom.byId("send-payment"), "click", function(evt){
+                // Request the text file
+                request.post("http://localhost:3000/process").then(
+                    function(response){
+
+                        console.log("response: " + response);
+                        // Display the text file content
+                        //resultDiv.innerHTML = "<pre>"+response+"</pre>";
+                    },
+                    function(error){
+                        // Display the error returned
+                        //resultDiv.innerHTML = "<div class=\"error\">"+error+"<div>";
+                    }
+                );
+            });               
+        }
+    );
+    </script>
+</body>
+</html>

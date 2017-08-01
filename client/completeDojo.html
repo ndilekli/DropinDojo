@@ -1,0 +1,33 @@
+<html>
+<body>
+    <button id='calculate-button'>Calculate</button>
+    <!-- load Dojo -->
+    <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
+            data-dojo-config="async: true"></script>
+
+    <script>
+    require(["dojo/dom", "dojo/on", "dojo/request", "dojo/request/xhr", "dojo/domReady!"],
+        function(dom, on, request, xhr){
+            var parameters = { search: 2 };
+            on(dom.byId("calculate-button"), "click", function(evt){
+                myValue = 2;
+                request.get("http://localhost:1337/calculate", {
+                query: {
+                    value:myValue,
+                    result_type:"mixed",
+                    lang:"en"
+                },
+                jsonp: "callback"
+            }).then(
+                    function(response){
+                        console.log("Result: " + response);
+                    },
+                    function(error){
+                    }
+                );
+            });
+        }
+    );
+    </script>
+</body>
+</html>
